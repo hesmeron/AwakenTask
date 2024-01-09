@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -42,8 +43,8 @@ public class DiceController : MonoBehaviour
     private Rigidbody _rigidbody;
     [SerializeField] 
     private float _throwVelocityMultiplier;
-    [SerializeField] 
-    private float _minimalVewlocity;
+    [FormerlySerializedAs("_minimalVewlocity")] [SerializeField] 
+    private float _minimalVelocity;
     [SerializeField] 
     private MeshFilter _meshFilter;
     [SerializeField] 
@@ -154,46 +155,74 @@ public class DiceController : MonoBehaviour
 
         return _diceSides[closestFaceIndex].Result;
     }
-#endregion
 
-    IEnumerator DragAndRollCoroutine()
+    private void StartDragging()
     {
         _rigidbody.useGravity = false;
         _rigidbody.velocity = Vector3.zero;
         _rigidbody.angularVelocity = Vector3.zero;
+    }
+
+    private void StartRolling()
+    {
+        _rigidbody.useGravity = true;
+        _resultManager.StartRoll();
+    }
+
+    private bool IsInAir()
+    {
+        return _rigidbody.velocity.magnitude > 0.02f || transform.position.y > 2.03f;
+    }
+
+    private void SubmitResult()
+    {
+        int result = GetClosestResult();
+        _resultManager.AddRollResult(result);
+        Debug.Log("Random numer rolled " + result);
+    }
+
+    private Vector3 GetRandomVelocity()
+    {
+        float x = Random.Range(-1f, 1f);
+        float z = Random.Range(-1f, 1f);
+        return new Vector3(x,0,z).normalized * (Random.Range(3, 5) * _throwVelocityMultiplier);
+    }
+#endregion
+
+    IEnumerator DragAndRollCoroutine()
+    {
+        StartDragging();
         do
         {
             AdjustDicePosition(_mouseInputSurface.GetMousePosition());
             yield return null;
         } while (Input.GetMouseButton(0));
-
-        _rigidbody.useGravity = true;
+        
         Vector3 adjustedVelocity = _currentVelocity / 1000f;
-        if (adjustedVelocity.magnitude > _minimalVewlocity)
+        if (adjustedVelocity.magnitude > _minimalVelocity)
         {
+            StartRolling();
             _rigidbody.velocity = adjustedVelocity * _throwVelocityMultiplier;
             yield return null;
-            while(_rigidbody.velocity.magnitude > 0.02f || transform.position.y > 2.03f)
+            while(IsInAir())
             {
                 yield return null;
             }
 
-            int result = GetClosestResult();
-            _resultManager.AddDiceResult(GetClosestResult());
-            Debug.Log("Random number rolled " + result);
+            SubmitResult();
         }
         else
         {
             _rigidbody.velocity = Vector3.zero;
+            _rigidbody.useGravity = true;
+            _resultManager.DiscardRoll();
             Debug.Log("Put down dice");
         }
     }
     
     IEnumerator RollAutomaticallyCoroutine()
     {
-        _rigidbody.useGravity = false;
-        _rigidbody.velocity = Vector3.zero;
-        _rigidbody.angularVelocity = Vector3.zero;
+        StartDragging();
         Vector3 centerPosition = _mouseInputSurface.GetCenterPosition();
         do
         {
@@ -201,19 +230,14 @@ public class DiceController : MonoBehaviour
             yield return null;
         } while (Vector3.Distance(centerPosition, transform.position) > 0.02f);
 
-        _rigidbody.useGravity = true;
-        float x = Random.Range(-1f, 1f);
-        float z = Random.Range(-1f, 1f);
-        Vector3 adjustedVelocity = new Vector3(x,0,z).normalized * (Random.Range(0.25f, 1.25f) * _throwVelocityMultiplier);
-        _rigidbody.velocity = adjustedVelocity * _throwVelocityMultiplier;
+        StartRolling();
+
+        _rigidbody.velocity = GetRandomVelocity();
         yield return null;
-        while(_rigidbody.velocity.magnitude > 0.02f || transform.position.y > 2.03f)
+        while(IsInAir())
         {
             yield return null;
         }
-
-        int result = GetClosestResult();
-        _resultManager.AddDiceResult(GetClosestResult());
-        Debug.Log("Random numer rolled " + result);
+        SubmitResult();
     }
 }

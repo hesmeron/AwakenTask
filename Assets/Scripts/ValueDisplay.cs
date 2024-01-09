@@ -13,5 +13,10 @@ public class ValueDisplay : MonoBehaviour
     public void SetValue(int value)
     {
         _text.text = _prefix + value.ToString();
+    }    
+    
+    public void SetValue(string value)
+    {
+        _text.text = _prefix + value;
     }
 }
