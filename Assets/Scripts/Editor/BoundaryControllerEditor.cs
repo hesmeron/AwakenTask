@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(MouseInputSurface))]
-public class MouseInputSurfaceEditor : Editor
+[CustomEditor(typeof(BoundaryController))]
+public class BoundaryControllerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
-        MouseInputSurface mouseInputSurface = target as MouseInputSurface;
+        BoundaryController mouseInputSurface = target as BoundaryController;
 
         if (GUILayout.Button("Build mesh"))
         {

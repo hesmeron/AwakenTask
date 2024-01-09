@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -35,6 +33,7 @@ public class DiceController : MonoBehaviour
         }
     }
 
+#region Properites
     [SerializeField] 
     private ResultManager _resultManager;
     [SerializeField]
@@ -55,8 +54,10 @@ public class DiceController : MonoBehaviour
     private float _followingLerpSpeed;
     [SerializeField] 
     private float _numberTextDistance = 0.75f;
+    
     private Vector3 _currentVelocity;
-
+#endregion
+    
 #region UnityFunctions
     private void OnDrawGizmosSelected()
     {
@@ -76,6 +77,8 @@ public class DiceController : MonoBehaviour
     }
 
 #endregion
+    
+#region PublicFunctions
     public void FindDiceFaces()
     {
         GetSidesFromMesh(_meshFilter.mesh);
@@ -85,7 +88,8 @@ public class DiceController : MonoBehaviour
     {
         StartCoroutine(RollAutomaticallyCoroutine());
     }
-
+#endregion
+    
 #region PrivateFunctions
     private void GetSidesFromMesh(Mesh mesh)
     {
@@ -189,6 +193,7 @@ public class DiceController : MonoBehaviour
     }
 #endregion
 
+#region Corotuines
     IEnumerator DragAndRollCoroutine()
     {
         StartDragging();
@@ -240,4 +245,6 @@ public class DiceController : MonoBehaviour
         }
         SubmitResult();
     }
+#endregion
+
 }
