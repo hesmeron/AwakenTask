@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// This is my custom trigonometry class. It is usefull engough so i just brought it over to this test project
+/// </summary>
 public static class Trigonometry 
 {
     public static void GetCastPoint(Vector3 from, Vector3 to, Vector3 pointToCast, out Vector3 result)
