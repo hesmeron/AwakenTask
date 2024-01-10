@@ -17,30 +17,6 @@ public class BoundaryController : MonoBehaviour
     [SerializeField] 
     [Range(0, 100)]
     private float _heightPercentage;
-
-    private void OnDrawGizmos()
-    {
-        float height = + _camera.scaledPixelHeight;
-        float width = _camera.scaledPixelWidth;
-        /*
-        Vector3 cornerLeftDown = CastPointOnPlane(new Vector3(0,0,1));
-        Vector3 cornerLeftUp = CastPointOnPlane(new Vector3(0, height, 1));
-        Vector3 cornerRightUp = CastPointOnPlane(new Vector3(width, height, 1));
-        Vector3 cornerRightDown = CastPointOnPlane(new Vector3(width, 0, 1));
-        Gizmos.color = Color.green;
-        Gizmos.DrawLine(cornerLeftUp, cornerLeftDown);
-        Gizmos.DrawLine(cornerLeftDown, cornerRightDown);
-        Gizmos.DrawLine(cornerRightDown, cornerRightUp);
-        Gizmos.DrawLine(cornerRightUp, cornerLeftUp);
-        Gizmos.DrawSphere(cornerLeftUp, 1f);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(cornerLeftDown, 1f);
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(cornerRightDown, 1f);
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(cornerRightUp, 1f);
-        */
-    }
     
     private void Awake()
     {

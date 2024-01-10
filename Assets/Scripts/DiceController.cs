@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Timers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -37,25 +38,35 @@ public class DiceController : MonoBehaviour
     [SerializeField] 
     private ResultManager _resultManager;
     [SerializeField]
+    private float _rolDrag = 0.9f;
+    [SerializeField]
     private MouseInputSurface _mouseInputSurface;
-    [SerializeField] 
-    private Rigidbody _rigidbody;
-    [SerializeField] 
-    private float _throwVelocityMultiplier;
-    [FormerlySerializedAs("_minimalVewlocity")] [SerializeField] 
-    private float _minimalVelocity;
     [SerializeField] 
     private MeshFilter _meshFilter;
     [SerializeField] 
     private List<DiceSide> _diceSides = new List<DiceSide>();
+    [SerializeField] 
+    private Rigidbody _rigidbody;
+    [SerializeField] 
+    [Tooltip("Used for automatic sides generation from mesh. Any face with greater or equal area will become a side")]
+    private float _minimumFaceSurfaceArea = 1f;
+    [SerializeField] 
+    private float _throwVelocityMultiplier;
+    [FormerlySerializedAs("_minimalVewlocity")] [SerializeField] 
+    private float _minimalVelocity;
     [SerializeField] 
     private TMP_Text _textPrefab;
     [SerializeField]
     private float _followingLerpSpeed;
     [SerializeField] 
     private float _numberTextDistance = 0.75f;
+
+    [Header("Debug")]
+    [SerializeField]
+    private TMP_Text _velocityDebug;
     
     private Vector3 _currentVelocity;
+    private Vector3 _previousTargetPosition;
 #endregion
     
 #region UnityFunctions
@@ -73,7 +84,10 @@ public class DiceController : MonoBehaviour
     
     private void OnMouseDown()
     {
-        StartCoroutine(DragAndRollCoroutine());
+        if (!IsInAir())
+        {
+            StartCoroutine(DragAndRollCoroutine());
+        }
     }
 
 #endregion
@@ -81,7 +95,7 @@ public class DiceController : MonoBehaviour
 #region PublicFunctions
     public void FindDiceFaces()
     {
-        GetSidesFromMesh(_meshFilter.mesh);
+        GetSidesFromMesh(_meshFilter.sharedMesh);
     }
 
     public void RollAutomatically()
@@ -95,10 +109,10 @@ public class DiceController : MonoBehaviour
     {
         ClearSides();
         Dictionary<Vector3,  List<Vector3>> normalDictionary = new Dictionary<Vector3, List<Vector3>>();
-        for (int index = 0; index < _meshFilter.mesh.vertices.Length; index++)
+        for (int index = 0; index < mesh.vertices.Length; index++)
         {
-            Vector3 vertex = _meshFilter.mesh.vertices[index];
-            Vector3 normal = _meshFilter.mesh.normals[index];
+            Vector3 vertex = mesh.vertices[index];
+            Vector3 normal = mesh.normals[index];
             if (!normalDictionary.ContainsKey(normal))
             {
                 normalDictionary.Add(normal, new List<Vector3>());
@@ -106,13 +120,40 @@ public class DiceController : MonoBehaviour
             normalDictionary[normal].Add(vertex);
         }
 
+        int sideCount = 1;
         foreach (KeyValuePair<Vector3, List<Vector3>> valuePair in normalDictionary)
         {
-            if (valuePair.Value.Count > 4)
+            if (TryCalculateSurfaceArea(valuePair.Value, out float surface))
             {
-                CreateSide(valuePair.Key);
+                if (surface > _minimumFaceSurfaceArea)
+                {
+                    CreateSide(valuePair.Key, sideCount);
+                    sideCount++;
+                }
             }
         }
+    }
+
+    private bool TryCalculateSurfaceArea(List<Vector3> vertexes, out float calculatedSurface)
+    {
+        if (vertexes.Count < 2)
+        {
+            calculatedSurface = 0;
+            return false;
+        }
+
+        float area = 0f;
+        Vector3 origin = vertexes[0];
+        for (int i = 1; i < vertexes.Count - 1; i++)
+        {
+            Vector3 current = vertexes[i];
+            Vector3 next = vertexes[i+1];
+            Vector3 cross = Vector3.Cross(origin-current, origin-next);
+            area += cross.magnitude /2f;
+        }
+
+        calculatedSurface = area;
+        return true;
     }
 
     private void ClearSides()
@@ -124,21 +165,24 @@ public class DiceController : MonoBehaviour
         _diceSides.Clear();
     }
 
-    private void CreateSide(Vector3 normal)
+    private void CreateSide(Vector3 normal, int result)
     {
         TMP_Text textInstance = Instantiate(_textPrefab, transform);
         textInstance.transform.localPosition = normal * _numberTextDistance;
         textInstance.transform.forward = -normal;
-        DiceSide side = new DiceSide(textInstance, normal, 0);
+        DiceSide side = new DiceSide(textInstance, normal, result);
         _diceSides.Add(side);
     }
     
     private void AdjustDicePosition(Vector3 targetPosition)
     {
         Vector3 currentPosition = transform.position;
-        _currentVelocity = (targetPosition - currentPosition) / Time.deltaTime;
+        _currentVelocity -= ((1 - _rolDrag) * Time.deltaTime * _currentVelocity);
+        _currentVelocity += ((targetPosition - _previousTargetPosition)/25f) / Time.deltaTime;
+        _velocityDebug.text = $"Velocity: {_currentVelocity} / {_minimalVelocity}";
         float lerpT = Time.deltaTime * _followingLerpSpeed;
         transform.position =  Vector3.Lerp(currentPosition, targetPosition, lerpT);
+        _previousTargetPosition = targetPosition;
     }
 
     private int GetClosestResult()
@@ -203,11 +247,10 @@ public class DiceController : MonoBehaviour
             yield return null;
         } while (Input.GetMouseButton(0));
         
-        Vector3 adjustedVelocity = _currentVelocity / 1000f;
-        if (adjustedVelocity.magnitude > _minimalVelocity)
+        if (_currentVelocity.magnitude > _minimalVelocity)
         {
             StartRolling();
-            _rigidbody.velocity = adjustedVelocity * _throwVelocityMultiplier;
+            _rigidbody.velocity =_currentVelocity * _throwVelocityMultiplier;
             yield return null;
             while(IsInAir())
             {

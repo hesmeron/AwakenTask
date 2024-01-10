@@ -5,6 +5,12 @@ using UnityEngine;
 public class MouseInputSurface : MonoBehaviour
 {
     [SerializeField] 
+    [Range(0, 100)]
+    private float _widthPercentage;    
+    [SerializeField] 
+    [Range(0, 100)]
+    private float _heightPercentage;
+    [SerializeField] 
     private Camera _camera;
     [SerializeField]
     private float _throwHeight = 5f;
@@ -31,7 +37,15 @@ public class MouseInputSurface : MonoBehaviour
 
     public Vector3 GetMousePosition()
     {
-        Vector3 mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5);
+        float halfHeightProportion = 0.5f + ((_heightPercentage / 100f) / 2f);
+        float halfWidthProportion = 0.5f + ((_widthPercentage / 100f) /2f);
+        float maxHeight = _camera.scaledPixelHeight * (halfHeightProportion);
+        float maxWidth = _camera.scaledPixelWidth* (halfWidthProportion);        
+        float minHeight = _camera.scaledPixelHeight * (1 - (halfHeightProportion));
+        float minWidth = _camera.scaledPixelWidth* (1 - (halfWidthProportion));
+        float x = Mathf.Clamp(Input.mousePosition.x, minWidth, maxWidth);
+        float y = Mathf.Clamp(Input.mousePosition.y, minHeight, maxHeight);
+        Vector3 mousePosition = new Vector3(x, y, 5);
         return CastPointOnPlane(mousePosition);
     }
 
