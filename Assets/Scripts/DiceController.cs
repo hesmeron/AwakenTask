@@ -37,10 +37,10 @@ public class DiceController : MonoBehaviour
 #region Properites
     [SerializeField] 
     private ResultManager _resultManager;
-    [SerializeField]
-    private float _rollDrag = 0.9f;    
-    [SerializeField]
-    private float _velocityIncreaseSpeed = 0.9f;
+    [FormerlySerializedAs("_velocityChange")] [SerializeField]
+    private float _velocityChangeSpeed = 12f;    
+    [FormerlySerializedAs("_velocityIncreaseSpeed")] [SerializeField]
+    private float _manualVelocityIncreaseModifier = 0.9f;
     [SerializeField]
     private MouseInputSurface _mouseInputSurface;
     [SerializeField] 
@@ -62,6 +62,11 @@ public class DiceController : MonoBehaviour
     private float _followingLerpSpeed;
     [SerializeField] 
     private float _numberTextDistance = 0.75f;
+
+    [SerializeField] 
+    private float _rollFinishHeight = 2.03f;    
+    [SerializeField] 
+    private float _rollFinishVelocity = 0.02f;
 
     [Header("Debug")]
     [SerializeField]
@@ -179,10 +184,8 @@ public class DiceController : MonoBehaviour
     private void AdjustDicePosition(Vector3 targetPosition)
     {
         Vector3 currentPosition = transform.position;
-        //_currentVelocity -= _currentVelocity * (_rollDrag * Time.deltaTime * _currentVelocity.sqrMagnitude);
-        _currentVelocity = (targetPosition - _previousTargetPosition)/100f * _velocityIncreaseSpeed / Time.deltaTime;
-        //float velocityLerp = Mathf.Max(0.1f, (newVelocity.magnitude / _currentVelocity.magnitude) - 0.5f);
-        //_currentVelocity =Vector3.Lerp( _currentVelocity, newVelocity, velocityLerp);
+        Vector3 newVelocity = (targetPosition - _previousTargetPosition)/100f * _manualVelocityIncreaseModifier / Time.deltaTime;
+        _currentVelocity = Vector3.Lerp(_currentVelocity, newVelocity, _velocityChangeSpeed * Time.deltaTime);
         _velocityDebug.text = $"Velocity: {_currentVelocity} - {_currentVelocity.magnitude} / {_minimalVelocity}";
         float lerpT = Time.deltaTime * _followingLerpSpeed;
         transform.position =  Vector3.Lerp(currentPosition, targetPosition, lerpT);
@@ -224,7 +227,7 @@ public class DiceController : MonoBehaviour
 
     private bool IsInAir()
     {
-        return _rigidbody.velocity.magnitude > 0.02f || transform.position.y > 2.03f;
+        return _rigidbody.velocity.magnitude > _rollFinishVelocity|| transform.position.y > _rollFinishHeight;
     }
 
     private void SubmitResult()

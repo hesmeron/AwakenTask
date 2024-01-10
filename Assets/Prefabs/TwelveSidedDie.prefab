@@ -485,6 +485,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resultManager: {fileID: 0}
+  _velocityChangeSpeed: 12
+  _manualVelocityIncreaseModifier: 5
   _mouseInputSurface: {fileID: 0}
   _meshFilter: {fileID: 1087560427815632592}
   _diceSides:
@@ -526,12 +528,15 @@ MonoBehaviour:
     Result: 12
   _rigidbody: {fileID: 1087560427812732668}
   _minimumFaceSurfaceArea: 0.1
-  _throwVelocityMultiplier: 5
+  _throwVelocityMultiplier: 10
   _minimalVelocity: 1
   _textPrefab: {fileID: 240096395156443216, guid: 1c6e779d0ef0f0a41837576ff83fc467,
     type: 3}
   _followingLerpSpeed: 16
   _numberTextDistance: 0.9
+  _rollFinishHeight: 2.03
+  _rollFinishVelocity: 0.02
+  _velocityDebug: {fileID: 0}
 --- !u!1 &2463987354274719887
 GameObject:
   m_ObjectHideFlags: 0

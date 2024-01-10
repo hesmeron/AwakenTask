@@ -1953,7 +1953,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: RollButton
+  m_text: 'Roll
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2220,7 +2222,7 @@ PrefabInstance:
     - target: {fileID: 1087560427812732658, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3
+      value: 2.04
       objectReference: {fileID: 0}
     - target: {fileID: 1087560427812732658, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
         type: 3}
@@ -2264,11 +2266,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1087560427812732669, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
         type: 3}
-      propertyPath: _rollDrag
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1087560427812732669, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
-        type: 3}
       propertyPath: _resultManager
       value: 
       objectReference: {fileID: 514089122}
@@ -2282,11 +2279,6 @@ PrefabInstance:
       propertyPath: _mouseInputSurface
       value: 
       objectReference: {fileID: 1011266136}
-    - target: {fileID: 1087560427812732669, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
-        type: 3}
-      propertyPath: _velocityIncreaseSpeed
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 1087560427815632592, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
         type: 3}
       propertyPath: m_Mesh
