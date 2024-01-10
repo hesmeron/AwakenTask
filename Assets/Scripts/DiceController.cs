@@ -37,9 +37,9 @@ public class DiceController : MonoBehaviour
 #region Properites
     [SerializeField] 
     private ResultManager _resultManager;
-    [FormerlySerializedAs("_velocityChange")] [SerializeField]
+    [SerializeField]
     private float _velocityChangeSpeed = 12f;    
-    [FormerlySerializedAs("_velocityIncreaseSpeed")] [SerializeField]
+    [SerializeField]
     private float _manualVelocityIncreaseModifier = 0.9f;
     [SerializeField]
     private MouseInputSurface _mouseInputSurface;
@@ -62,7 +62,6 @@ public class DiceController : MonoBehaviour
     private float _followingLerpSpeed;
     [SerializeField] 
     private float _numberTextDistance = 0.75f;
-
     [SerializeField] 
     private float _rollFinishHeight = 2.03f;    
     [SerializeField] 
@@ -184,11 +183,15 @@ public class DiceController : MonoBehaviour
     private void AdjustDicePosition(Vector3 targetPosition)
     {
         Vector3 currentPosition = transform.position;
+        float lerpT = Time.deltaTime * _followingLerpSpeed;
+        transform.position =  Vector3.Lerp(currentPosition, targetPosition, lerpT);
+    }
+
+    private void AdjustVelocity(Vector3 targetPosition)
+    {
         Vector3 newVelocity = (targetPosition - _previousTargetPosition)/100f * _manualVelocityIncreaseModifier / Time.deltaTime;
         _currentVelocity = Vector3.Lerp(_currentVelocity, newVelocity, _velocityChangeSpeed * Time.deltaTime);
         _velocityDebug.text = $"Velocity: {_currentVelocity} - {_currentVelocity.magnitude} / {_minimalVelocity}";
-        float lerpT = Time.deltaTime * _followingLerpSpeed;
-        transform.position =  Vector3.Lerp(currentPosition, targetPosition, lerpT);
         _previousTargetPosition = targetPosition;
     }
 
@@ -251,7 +254,9 @@ public class DiceController : MonoBehaviour
         StartDragging();
         do
         {
-            AdjustDicePosition(_mouseInputSurface.GetMousePosition());
+            Vector3 mousePosition = _mouseInputSurface.GetMousePosition();
+            AdjustDicePosition(mousePosition);
+            AdjustVelocity(mousePosition);
             yield return null;
         } while (Input.GetMouseButton(0));
         
@@ -269,9 +274,16 @@ public class DiceController : MonoBehaviour
         }
         else
         {
+            _resultManager.DiscardRoll();
+            Vector3 landingPosition = new Vector3(transform.position.x, _rollFinishHeight, transform.position.z);
+            while (transform.position.y > _rollFinishHeight + 0.02f)
+            {
+                float t = _followingLerpSpeed * Time.deltaTime;
+                transform.position = Vector3.Lerp(transform.position, landingPosition, t);
+                yield return null;
+            }
             _rigidbody.velocity = Vector3.zero;
             _rigidbody.useGravity = true;
-            _resultManager.DiscardRoll();
             Debug.Log("Put down dice");
         }
     }
