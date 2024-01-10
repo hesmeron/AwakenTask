@@ -38,7 +38,9 @@ public class DiceController : MonoBehaviour
     [SerializeField] 
     private ResultManager _resultManager;
     [SerializeField]
-    private float _rolDrag = 0.9f;
+    private float _rollDrag = 0.9f;    
+    [SerializeField]
+    private float _velocityIncreaseSpeed = 0.9f;
     [SerializeField]
     private MouseInputSurface _mouseInputSurface;
     [SerializeField] 
@@ -177,9 +179,11 @@ public class DiceController : MonoBehaviour
     private void AdjustDicePosition(Vector3 targetPosition)
     {
         Vector3 currentPosition = transform.position;
-        _currentVelocity -= ((1 - _rolDrag) * Time.deltaTime * _currentVelocity);
-        _currentVelocity += ((targetPosition - _previousTargetPosition)/25f) / Time.deltaTime;
-        _velocityDebug.text = $"Velocity: {_currentVelocity} / {_minimalVelocity}";
+        //_currentVelocity -= _currentVelocity * (_rollDrag * Time.deltaTime * _currentVelocity.sqrMagnitude);
+        _currentVelocity = (targetPosition - _previousTargetPosition)/100f * _velocityIncreaseSpeed / Time.deltaTime;
+        //float velocityLerp = Mathf.Max(0.1f, (newVelocity.magnitude / _currentVelocity.magnitude) - 0.5f);
+        //_currentVelocity =Vector3.Lerp( _currentVelocity, newVelocity, velocityLerp);
+        _velocityDebug.text = $"Velocity: {_currentVelocity} - {_currentVelocity.magnitude} / {_minimalVelocity}";
         float lerpT = Time.deltaTime * _followingLerpSpeed;
         transform.position =  Vector3.Lerp(currentPosition, targetPosition, lerpT);
         _previousTargetPosition = targetPosition;
@@ -209,6 +213,7 @@ public class DiceController : MonoBehaviour
         _rigidbody.useGravity = false;
         _rigidbody.velocity = Vector3.zero;
         _rigidbody.angularVelocity = Vector3.zero;
+        _currentVelocity = Vector3.zero;
     }
 
     private void StartRolling()

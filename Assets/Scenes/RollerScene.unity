@@ -2264,6 +2264,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1087560427812732669, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
         type: 3}
+      propertyPath: _rollDrag
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1087560427812732669, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
+        type: 3}
       propertyPath: _resultManager
       value: 
       objectReference: {fileID: 514089122}
@@ -2277,6 +2282,11 @@ PrefabInstance:
       propertyPath: _mouseInputSurface
       value: 
       objectReference: {fileID: 1011266136}
+    - target: {fileID: 1087560427812732669, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
+        type: 3}
+      propertyPath: _velocityIncreaseSpeed
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1087560427815632592, guid: c3ed8e62d78780f4a868d6f08bfd6f13,
         type: 3}
       propertyPath: m_Mesh
